@@ -1,4 +1,7 @@
+import dataclasses
+
 import pandas
+import yfinance
 
 
 def get_prime_stocks() -> pandas.DataFrame:
@@ -27,8 +30,36 @@ def select_not_nk225_stocks(
     return not_nk225_stocks
 
 
+@dataclasses.dataclass
+class StockInfo:
+    code: str
+    shortName: str
+    longName: str
+    price: int  # 株価
+    volume: int  # 出来高
+    marketCapacity: int  # 時価総額
+    pbr: float  # PBR
+    per: float  # PER
+
+
+def get_stock_info(code: str) -> StockInfo:
+    ticker = yfinance.Ticker(f"{code}.T")
+    info = ticker.info
+    return StockInfo(
+        code=code,
+        shortName=info["shortName"],
+        longName=info["longName"],
+        price=int(info["currentPrice"]),
+        volume=int(info["volume"]),
+        marketCapacity=int(info["marketCap"]),
+        pbr=info["priceToBook"],
+        per=info["trailingPE"],
+    )
+
+
 if __name__ == "__main__":
-    prime_stocks = get_prime_stocks()
-    nk225_stocks = get_nikkei_225_stocks()
-    result = select_not_nk225_stocks(prime_stocks, nk225_stocks)
-    print(result)
+    # prime_stocks = get_prime_stocks()
+    # nk225_stocks = get_nikkei_225_stocks()
+    # result = select_not_nk225_stocks(prime_stocks, nk225_stocks)
+    # print(result)
+    print(get_stock_info("1301"))
